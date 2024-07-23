@@ -189,6 +189,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/login');
                     // Add login functionality
                   },
                   child: const Text(

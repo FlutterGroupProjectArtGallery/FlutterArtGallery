@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'home.dart';
+import 'search.dart';
+import 'like.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignUpPage(),
         '/home': (context) => HomePage(),
+        '/search': (context) => SearchPage(),
+        '/like': (context) => LikePage(),
       },
     );
   }

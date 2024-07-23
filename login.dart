@@ -123,6 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity, // Full width
                 child: ElevatedButton(
                   onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/home');
                     // Add login functionality
                   },
                   style: ElevatedButton.styleFrom(
