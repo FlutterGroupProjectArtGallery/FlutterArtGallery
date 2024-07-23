@@ -3,9 +3,15 @@ import 'package:art_gallery_application/screens/drawer/airplanedrawer.dart';
 import 'package:art_gallery_application/screens/drawer/briefcasedrawer.dart';
 import 'package:art_gallery_application/screens/drawer/housedrawer.dart';
 import 'package:art_gallery_application/screens/homepage.dart';
-import 'package:art_gallery_application/screens/profile.dart';
+import 'package:art_gallery_application/userauth/userauth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase/firebase_options.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -19,7 +25,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(),
-        '/second': (context) => const MyPersonalProfileScreen(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignUpPage(),
+        '/homepage': (context) => const MyHomePage(),
         '/housedrawer': (context) => const MyHouseDrawer(),
         '/briefcasedrawer': (context) => const MyBriefcaseDrawer(),
         '/airplanedrawer': (context) => const MyAirplaneDrawer(),

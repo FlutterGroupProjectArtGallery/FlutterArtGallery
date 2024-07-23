@@ -1,119 +1,106 @@
 import 'package:flutter/material.dart';
-import 'package:art_gallery_application/data/data.dart';
-import 'package:art_gallery_application/screens/screens.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class MyApp extends StatelessWidget {
+   MyApp({super.key});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PocketSight',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        textTheme: GoogleFonts.poppinsTextTheme(),
+      ),
+      home: const MyHomePage(),
+    );
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int currentIndex = 1;
-  int selectedIndex = 1;
 
-  final List<Widget> _screens = [
-    const MyAirplaneBody(),
-    MyBodyHome(person: Person()),
-    const MySettingsBody(),
-  ];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  int _selectedIndex = 1;
+   // Default to Home
+@override
+void initState() {
+ super.initState();
+ FirebaseAuth.instance.authStateChanges().listen((User? user) {
+   if (user == null) {
+     Navigator.pushNamed(context, '/login');
+   } else {
+     print("User is signed in!");
+     // Update the UI or redirect as needed
+   }
+ });
+} 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF333333),
+        title: const Text(
+          '  POCKET SIGHTS',
+          style: TextStyle(
+            color: Color(0xFFF7F7F7),
+            fontWeight: FontWeight.w900, // Make the text bold
+            letterSpacing: 1.0, // Add letter spacing if needed
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false, // Left-align the title
+        titleSpacing: 0, // Remove spacing from the start
+        toolbarHeight: kToolbarHeight, // Set toolbar height to default
         actions: const [
           Padding(
               padding: EdgeInsets.all(8.0),
               child: Material(
-                shape: CircleBorder(),
+                shape: CircleBorder(side: BorderSide(color: Colors.black,width: 2)),
               )),
           Material(
             elevation: 4.0,
             shape: CircleBorder(),
-            color: Colors.transparent,
+            color: Colors.white,
             child: Icon(Icons.person),
           ),
         ],
       ),
-      backgroundColor: Colors.white,
-      body: _screens[currentIndex],
-      drawer: Drawer(
-        backgroundColor: Colors.white,
-        child: ListView(
-          children: [
-            const SizedBox(
-              height: 65,
-              child: DrawerHeader(
-                decoration: BoxDecoration(color: Colors.white),
-                child: Text("Pocket Sights"),
-              ),
-            ),
-            ListTile(
-              textColor: Colors.black,
-              iconColor: Colors.black,
-              leading: const Icon(Icons.home),
-              title: const Text("House"),
-              trailing: const Icon(Icons.more_vert),
-              onTap: () {
-                Navigator.pushNamed(context, '/housedrawer');
-              },
-            ),
-            ListTile(
-              textColor: Colors.black,
-              iconColor: Colors.black,
-              leading: const Icon(Icons.work),
-              title: const Text("Brief Case"),
-              trailing: const Icon(Icons.more_vert),
-              onTap: () {
-                Navigator.pushNamed(context, '/briefcasedrawer');
-              },
-            ),
-            ListTile(
-              textColor: Colors.black,
-              iconColor: Colors.black,
-              leading: const Icon(Icons.flight),
-              title: const Text("Airplane"),
-              trailing: const Icon(Icons.more_vert),
-              onTap: () {
-                Navigator.pushNamed(context, '/airplanedrawer');
-              },
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: const Color.fromARGB(255, 56, 56, 56),
-        indicatorColor: const Color.fromARGB(255, 99, 102, 101),
-        destinations: const [
-          NavigationDestination(
-              icon: Icon(
-                Icons.flight,
-                color: Colors.white,
-              ),
-              label: 'Category'),
-          NavigationDestination(
-              icon: Icon(
-                Icons.home,
-                color: Colors.white,
-              ),
-              label: 'Home'),
-          NavigationDestination(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            label: 'Settings',
+      body: Center(),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFF333333),
+        selectedItemColor: const Color(0xFFF7F7F7),
+        unselectedItemColor: Color.fromARGB(255, 209, 209, 209),
+        onTap: _onItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Category',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Likes',
           ),
         ],
-        surfaceTintColor: Colors.black,
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        selectedIndex: currentIndex,
       ),
     );
   }
