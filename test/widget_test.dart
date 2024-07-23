@@ -8,7 +8,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+<<<<<<< HEAD
 import 'package:myapp/home.dart';
+=======
+import 'package:myapp/main.dart';
+>>>>>>> 26d1be9c82a7ccc9e7f692ba83fa87a05c291641
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
