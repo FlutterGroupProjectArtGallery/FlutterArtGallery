@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -93,6 +94,31 @@ class _ProfilePageState extends State<ProfilePage> {
       _firstNameController.text = _firstName;
       _lastNameController.text = _lastName;
     });
+  }
+
+  Future<void> _handleSignOut() async {
+    try {
+      // Clear cached data
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('shuffled_artworks');
+      await prefs.remove('app_initialized');
+
+      // Sign out the user
+      await FirebaseAuth.instance.signOut();
+
+      // Navigate to the login page and remove all previous routes
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      // Handle any errors that occur during sign-out
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error signing out: $e'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
   @override
@@ -320,14 +346,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const Spacer(),
               Center(
                 child: ElevatedButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/login',
-                      (Route<dynamic> route) => false,
-                    );
-                  },
+                  onPressed: _handleSignOut,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF333333),
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 15),

@@ -1,22 +1,38 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'category.dart'; // Import the Category class
+import 'package:art_gallery_application/data/data.dart'; // Import the data file
+import 'package:shared_preferences/shared_preferences.dart'; // For persistent storage
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  List<Map<String, String>> _trendingItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _shuffleArtworks(); // Shuffle artworks every time the page is loaded
+  }
+
+  Future<void> _shuffleArtworks() async {
+    final allArtworks = artworkDetails.values.expand((artworks) => artworks).toList();
+    allArtworks.shuffle(); // Shuffle the artworks
+
+    setState(() {
+      _trendingItems = allArtworks; // Update the state with the shuffled artworks
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final Category category = Category(); // Create an instance of Category
-
-    // Example data for trending items
-    final List<Map<String, String>> trendingItems = [
-      {'Art1': 'Artist 1'},
-      {'Art2': 'Artist 2'},
-      {'Art3': 'Artist 3'},
-      {'Art4': 'Artist 4'},
-      // Add more items as needed
-    ];
 
     return Scaffold(
       body: ListView(
@@ -33,6 +49,23 @@ class SearchPage extends StatelessWidget {
                   icon: Icon(Icons.filter_list, color: const Color(0xFF333333)),
                   onPressed: () {
                     // Add filter functionality here
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('Filter Options'),
+                          content: Text('Add your filter options here.'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('Close'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                 ),
                 filled: true,
@@ -108,9 +141,13 @@ class SearchPage extends StatelessWidget {
             height: 200, // Adjust height as needed
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: trendingItems.length,
+              itemCount: _trendingItems.length,
               itemBuilder: (context, index) {
-                final item = trendingItems[index];
+                final item = _trendingItems[index];
+                final artName = item['Title'] ?? 'Unknown';
+                final artistName = item['Artist'] ?? 'Unknown';
+                final imagePath = item['FileLocation'] ?? '';
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Column(
@@ -123,17 +160,26 @@ class SearchPage extends StatelessWidget {
                           color: const Color(0xFF333333), // Background color for the box
                           borderRadius: BorderRadius.circular(8), // Rounded corners
                         ),
-                        child: Center(
-                          child: Icon(
-                            Icons.image, // Placeholder icon
-                            color: Colors.white,
-                            size: 60, // Adjust icon size as needed
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 60,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
                       SizedBox(height: 8),
                       Text(
-                        item.keys.first, // Display the art name
+                        artName, // Display the art name
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -142,7 +188,7 @@ class SearchPage extends StatelessWidget {
                         textAlign: TextAlign.left, // Align text to the left
                       ),
                       Text(
-                        item.values.first, // Display the artist name
+                        artistName, // Display the artist name
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.normal,
