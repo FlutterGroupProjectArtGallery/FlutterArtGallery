@@ -138,68 +138,71 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           SizedBox(
-            height: 200, // Adjust height as needed
-            child: ListView.builder(
+            height: 300, // Adjust height as needed
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              itemCount: _trendingItems.length,
-              itemBuilder: (context, index) {
-                final item = _trendingItems[index];
-                final artName = item['Title'] ?? 'Unknown';
-                final artistName = item['Artist'] ?? 'Unknown';
-                final imagePath = item['FileLocation'] ?? '';
+              child: Row(
+                children: _trendingItems.map((item) {
+                  final artName = item['Title'] ?? 'Unknown';
+                  final artistName = item['Artist'] ?? 'Unknown';
+                  final imagePath = item['FileLocation'] ?? '';
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align to the left
-                    children: [
-                      Container(
-                        width: 120, // Adjust width as needed
-                        height: 120, // Adjust height as needed
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF333333), // Background color for the box
-                          borderRadius: BorderRadius.circular(8), // Rounded corners
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            imagePath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                  size: 60,
-                                ),
-                              );
-                            },
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      width: 150, // Adjust width as needed
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start, // Align to the left
+                        children: [
+                          Container(
+                            width: 150, // Match container width to the overall width
+                            height: 150, // Adjust height as needed
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF333333), // Background color for the box
+                              borderRadius: BorderRadius.circular(8), // Rounded corners
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                imagePath,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Center(
+                                    child: Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 60,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 8),
+                          Text(
+                            artName, // Display the art name
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF333333),
+                            ),
+                            textAlign: TextAlign.left, // Align text to the left
+                          ),
+                          Text(
+                            artistName, // Display the artist name
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              color: const Color(0xFF333333),
+                            ),
+                            textAlign: TextAlign.left, // Align text to the left
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        artName, // Display the art name
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF333333),
-                        ),
-                        textAlign: TextAlign.left, // Align text to the left
-                      ),
-                      Text(
-                        artistName, // Display the artist name
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
-                          color: const Color(0xFF333333),
-                        ),
-                        textAlign: TextAlign.left, // Align text to the left
-                      ),
-                    ],
-                  ),
-                );
-              },
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],
