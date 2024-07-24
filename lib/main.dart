@@ -1,11 +1,9 @@
+import 'package:art_gallery_application/userauth/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:art_gallery_application/screens/drawer/airplanedrawer.dart';
-import 'package:art_gallery_application/screens/drawer/briefcasedrawer.dart';
-import 'package:art_gallery_application/screens/drawer/housedrawer.dart';
-import 'package:art_gallery_application/screens/homepage.dart';
-import 'package:art_gallery_application/userauth/userauth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase/firebase_options.dart';
+import 'screens/screens.dart';
+import 'userauth/userauth.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +26,10 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/homepage': (context) => const MyHomePage(),
-        '/housedrawer': (context) => const MyHouseDrawer(),
-        '/briefcasedrawer': (context) => const MyBriefcaseDrawer(),
-        '/airplanedrawer': (context) => const MyAirplaneDrawer(),
+        '/homebody': (context) => HomeBody(),
+        '/search': (context) => const SearchPage(),
+        '/like': (context) => const LikePage(),
+        '/profile': (context) => const ProfilePage()
       },
       title: 'Pocket Sights Demo',
       theme: ThemeData(
