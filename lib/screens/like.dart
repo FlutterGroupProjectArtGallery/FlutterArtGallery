@@ -51,6 +51,25 @@ class _LikePageState extends State<LikePage> {
     }
   }
 
+  void _onArtworkTap(Map<String, dynamic> artwork) {
+    final artName = artwork['artName'] ?? 'Unknown';
+    final artistName = artwork['artistName'] ?? 'Unknown';
+    final description = artwork['description'] ?? 'No description available'; // Extract description
+    final imagePath = artwork['imagePath'] ?? '';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ViewPage(
+          artName: artName,
+          artistName: artistName,
+          description: description,
+          imagePath: imagePath,
+        ),
+      ),
+    );
+  }
+
   Future<void> _toggleFavorite(Map<String, dynamic> item, int index) async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -123,19 +142,7 @@ class _LikePageState extends State<LikePage> {
                       itemBuilder: (context, index) {
                         final item = _favoritedItems[index];
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ViewPage(
-                                  artName: item['artName'] ?? '',
-                                  artistName: item['artistName'] ?? '',
-                                  description: item['description'] ?? '',
-                                  imagePath: item['imagePath'] ?? '', // Pass the imagePath
-                                ),
-                              ),
-                            );
-                          },
+                          onTap: () => _onArtworkTap(item),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -198,7 +205,7 @@ class _LikePageState extends State<LikePage> {
                               IconButton(
                                 icon: Icon(
                                   Icons.favorite,
-                                  color: item['isFavorited'] ? Colors.red : Color(0xFF333333),
+                                  color: item['isFavorited'] ? Colors.red : const Color(0xFF333333),
                                   size: 30, // Reduced icon size
                                 ),
                                 onPressed: () {

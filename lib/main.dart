@@ -26,10 +26,10 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/homepage': (context) => const MyHomePage(),
-        '/homebody': (context) => HomeBody(),
+        '/homebody': (context) => const HomeBody(),
         '/search': (context) => const SearchPage(),
         '/like': (context) => const LikePage(),
-        '/profile': (context) => const ProfilePage()
+        '/profile': (context) => const ProfilePage(),
       },
       title: 'Pocket Sights Demo',
       theme: ThemeData(

@@ -18,61 +18,71 @@ final List<Map<String, String>> contemporaryArts = [
     'Title': 'The Physical Impossibility of Death in the Mind of Someone Living',
     'Artist': 'Damien Hirst',
     'Description': 'A 1991 installation featuring a shark suspended in formaldehyde. It explores themes of mortality and the human condition.',
-    'FileLocation': 'artworks/cart1.jpg'
+    'FileLocation': 'artworks/cart1.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'Balloon Dog (Orange)',
     'Artist': 'Jeff Koons',
     'Description': 'A 1994-2000 sculpture that exemplifies Koons\' fascination with pop culture and consumerism. Its shiny, balloon-like form has become iconic in contemporary art.',
-    'FileLocation': 'artworks/cart2.jpg'
+    'FileLocation': 'artworks/cart2.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'Untitled (L.A. Women)',
     'Artist': 'David Hockney',
     'Description': 'Part of a series from the 1980s, this painting reflects Hockney’s interest in depicting modern life and relationships through vibrant colors and composition.',
-    'FileLocation': 'artworks/cart3.jpg'
+    'FileLocation': 'artworks/cart3.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'Girl with a Pearl Earring (Reinterpretation)',
     'Artist': 'Johannes Vermeer (Contemporary Take)',
     'Description': 'This iconic 17th-century painting has been reinterpreted by many contemporary artists, reflecting ongoing fascination with Vermeer’s work.',
-    'FileLocation': 'artworks/cart4.jpg'
+    'FileLocation': 'artworks/cart4.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'For the Love of God',
     'Artist': 'Damien Hirst',
     'Description': 'A 2007 artwork featuring a platinum skull encrusted with diamonds. It addresses themes of mortality and luxury.',
-    'FileLocation': 'artworks/cart5.jpg'
+    'FileLocation': 'artworks/cart5.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'I Am Not a Joke',
     'Artist': 'Jean-Michel Basquiat',
     'Description': 'A painting by Basquiat that combines graffiti influences with abstract and symbolic elements, showcasing his distinctive style.',
-    'FileLocation': 'artworks/cart6.jpg'
+    'FileLocation': 'artworks/cart6.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'The Gates',
     'Artist': 'Christo and Jeanne-Claude',
     'Description': 'A 2005 installation in Central Park featuring 7,503 gates draped in orange fabric. It transformed the landscape and engaged viewers in a unique experience.',
-    'FileLocation': 'artworks/cart7.jpg'
+    'FileLocation': 'artworks/cart7.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'Composition VIII',
     'Artist': 'Wassily Kandinsky',
     'Description': 'A 1923 painting that explores abstract forms and colors, reflecting Kandinsky’s contributions to the development of modern abstract art.',
-    'FileLocation': 'artworks/cart8.jpg'
+    'FileLocation': 'artworks/cart8.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'The Persistence of Memory (Contemporary Reinterpretation)',
     'Artist': 'Salvador Dalí (Reinterpretation)',
     'Description': 'Dalí’s iconic 1931 surrealist painting has been revisited and reinterpreted by various contemporary artists exploring themes of time and perception.',
-    'FileLocation': 'artworks/cart9.jpg'
+    'FileLocation': 'artworks/cart9.jpg',
+    'Category': 'Contemporary Arts'
   },
   {
     'Title': 'Untitled (Black)',
     'Artist': 'Mark Rothko',
     'Description': 'A painting from Rothko’s later years, featuring his signature color field style. It reflects his exploration of emotional depth through color and form.',
-    'FileLocation': 'artworks/cart10.jpg'
+    'FileLocation': 'artworks/cart10.jpg',
+    'Category': 'Contemporary Arts'
   },
 ];
 

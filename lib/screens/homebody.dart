@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'view.dart';
 import 'package:art_gallery_application/data/data.dart'; // Ensure this import is correct
-import 'dart:convert'; // For encoding/decoding JSON data// For shuffling the list
+import 'dart:convert'; // For encoding/decoding JSON data
 import 'package:shared_preferences/shared_preferences.dart'; // For persistent storage
 
 class HomeBody extends StatefulWidget {
@@ -73,41 +73,39 @@ class _HomeBodyState extends State<HomeBody> with SingleTickerProviderStateMixin
   }
 
   Future<void> _shuffleArtworks() async {
-  // Combine all categories into a single list
-  final allArtworks = _artworks.values.expand((artworks) => artworks).toList();
-  print("All artworks combined: ${allArtworks.length} items"); // Debug statement
+    // Combine all categories into a single list
+    final allArtworks = _artworks.values.expand((artworks) => artworks).toList();
+    print("All artworks combined: ${allArtworks.length} items"); // Debug statement
 
-  final prefs = await SharedPreferences.getInstance();
-  final isInitialized = prefs.getBool('app_initialized') ?? false;
+    final prefs = await SharedPreferences.getInstance();
+    final isInitialized = prefs.getBool('app_initialized') ?? false;
 
-  List<Map<String, String>> filteredArtworks;
+    List<Map<String, String>> filteredArtworks;
 
-  if (isInitialized) {
-    // If already initialized, no need to filter out liked artworks
-    filteredArtworks = allArtworks;
-  } else {
-    // Filter out liked artworks only on the first shuffle
-    filteredArtworks = allArtworks.where((item) => !_isFavorited.containsKey(item['Title'])).toList();
-    print("Filtered artworks before shuffle: ${filteredArtworks.length} items"); // Debug statement
+    if (isInitialized) {
+      // If already initialized, no need to filter out liked artworks
+      filteredArtworks = allArtworks;
+    } else {
+      // Filter out liked artworks only on the first shuffle
+      filteredArtworks = allArtworks.where((item) => !_isFavorited.containsKey(item['Title'])).toList();
+      print("Filtered artworks before shuffle: ${filteredArtworks.length} items"); // Debug statement
 
-    // Store the initialization status
-    await prefs.setBool('app_initialized', true);
+      // Store the initialization status
+      await prefs.setBool('app_initialized', true);
+    }
+
+    // Shuffle the filtered artworks list
+    filteredArtworks.shuffle();
+
+    // Encode shuffled artworks to JSON
+    final jsonArtworks = jsonEncode(filteredArtworks);
+    await prefs.setString('shuffled_artworks', jsonArtworks);
+
+    setState(() {
+      _filteredArtworks = filteredArtworks;
+      print("Filtered artworks after shuffle: ${_filteredArtworks.length} items"); // Debug statement
+    });
   }
-
-  // Shuffle the filtered artworks list
-  filteredArtworks.shuffle();
-
-  // Encode shuffled artworks to JSON
-  final jsonArtworks = jsonEncode(filteredArtworks);
-  await prefs.setString('shuffled_artworks', jsonArtworks);
-
-  setState(() {
-    _filteredArtworks = filteredArtworks;
-    print("Filtered artworks after shuffle: ${_filteredArtworks.length} items"); // Debug statement
-  });
-}
-
-
 
   Future<void> _loadFilteredArtworks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -135,6 +133,7 @@ class _HomeBodyState extends State<HomeBody> with SingleTickerProviderStateMixin
       final bookmarkRef = _firestore.collection('users').doc(user.uid).collection('likes');
       final itemName = item['Title'] ?? '';
       final imagePath = item['FileLocation'] ?? '';
+      final description = item['Description'] ?? ''; // Retrieve the description
 
       if (itemName.isEmpty) {
         print("Item name is empty.");
@@ -155,6 +154,7 @@ class _HomeBodyState extends State<HomeBody> with SingleTickerProviderStateMixin
             'name': itemName,
             'artist': item['Artist'],
             'imagePath': imagePath,
+            'description': description, // Include description here
           });
         }
 
@@ -197,7 +197,7 @@ class _HomeBodyState extends State<HomeBody> with SingleTickerProviderStateMixin
             ),
           ),
           SizedBox(
-            height: 800, // Adjust height as needed
+            height: 752, // Adjust height as needed
             child: ListView.builder(
               itemCount: _filteredArtworks.length,
               itemBuilder: (context, index) {
