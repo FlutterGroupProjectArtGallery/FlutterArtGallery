@@ -1,96 +1,147 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'category.dart'; // Import the Category class
-import 'package:art_gallery_application/data/data.dart'; // Import the data file
+import 'category.dart';
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'view.dart';
+import 'package:art_gallery_application/data/data.dart'; // Make sure this import is correct
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({Key? key}) : super(key: key);
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
-  List<Map<String, String>> _trendingItems = [];
-  List<Map<String, String>> _allArtworks = [];
-  String? _selectedCategory; // State variable for the selected category
-  String _searchQuery = ''; // State variable for the search query
+class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateMixin {
+  final Category category = Category();
+  List<Map<String, String>> filteredItems = [];
+  String _selectedCategory = 'Trending';
+  String _searchQuery = '';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, bool> _isFavorited = {};
+  late AnimationController _animationController;
+  final Duration _animationDuration = const Duration(milliseconds: 300);
 
   @override
   void initState() {
     super.initState();
-    _loadArtworks(); // Load artworks when the page is loaded
+    _updateFilteredItems();
+    _animationController = AnimationController(vsync: this, duration: _animationDuration);
+    _loadFavorites();
   }
 
-  Future<void> _loadArtworks() async {
-    _allArtworks = artworkDetails.values.expand((artworks) => artworks).toList();
-    print('All artworks count: ${_allArtworks.length}');
-    _updateSearchResults(); // Update the search results based on the initial state
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
-  void _updateSearchResults() {
+  List<Map<String, String>> _searchAllArtworks(String query) {
+    return artworkDetails.values.expand((list) => list).where((item) {
+      final title = item['Title']?.toLowerCase() ?? '';
+      final artist = item['Artist']?.toLowerCase() ?? '';
+      return title.contains(query.toLowerCase()) ||
+          artist.contains(query.toLowerCase());
+    }).toList();
+  }
+
+  Future<void> _loadFavorites() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final bookmarkRef = _firestore.collection('users').doc(user.uid).collection('likes');
+      final querySnapshot = await bookmarkRef.get();
+
+      final likedItems = querySnapshot.docs.map((doc) => doc.data()['name'] as String).toList();
+      setState(() {
+        _isFavorited.addAll(Map.fromIterable(
+          likedItems,
+          key: (item) => item,
+          value: (item) => true,
+        ));
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite(Map<String, String> item) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final bookmarkRef = _firestore.collection('users').doc(user.uid).collection('likes');
+      final itemName = item['Title'] ?? '';
+      final imagePath = item['FileLocation'] ?? '';
+      final description = item['Description'] ?? '';
+
+      if (itemName.isEmpty) {
+        print("Item name is empty.");
+        return;
+      }
+
+      try {
+        if (_isFavorited[itemName] == true) {
+          final querySnapshot = await bookmarkRef.where('name', isEqualTo: itemName).get();
+          if (querySnapshot.docs.isNotEmpty) {
+            await querySnapshot.docs.first.reference.delete();
+          }
+        } else {
+          await bookmarkRef.add({
+            'name': itemName,
+            'artist': item['Artist'],
+            'imagePath': imagePath,
+            'description': description,
+          });
+        }
+
+        setState(() {
+          _isFavorited[itemName] = !(_isFavorited[itemName] ?? false);
+        });
+
+        _animationController.forward().then((_) => _animationController.reverse());
+      } catch (e) {
+        print("Error toggling favorite: $e");
+      }
+    } else {
+      print("No user is logged in.");
+    }
+  }
+
+  void _updateFilteredItems() {
     setState(() {
-      List<Map<String, String>> filteredArtworks = _allArtworks;
-
-      // Filter by category if one is selected
-      if (_selectedCategory != null && _selectedCategory!.isNotEmpty) {
-        final selectedCategoryLower = _selectedCategory!.toLowerCase(); // Convert selected category to lowercase
-        filteredArtworks = filteredArtworks.where((artwork) {
-          final categories = artwork['Categories']?.split(',') ?? [];
-          return categories.any((category) => category.trim().toLowerCase() == selectedCategoryLower);
-        }).toList();
-      }
-
-      // Filter by search query
       if (_searchQuery.isNotEmpty) {
-        filteredArtworks = filteredArtworks.where((artwork) {
-          final title = artwork['Title']?.toLowerCase() ?? '';
-          return title.contains(_searchQuery.toLowerCase());
-        }).toList();
+        filteredItems = _searchAllArtworks(_searchQuery);
+      } else if (_selectedCategory == 'Trending') {
+        filteredItems = artworkDetails.values
+            .expand((list) => list)
+            .toList()
+          ..shuffle(Random());
+        filteredItems = filteredItems.take(10).toList();
+      } else {
+        filteredItems = artworkDetails[_selectedCategory] ?? [];
       }
-
-      filteredArtworks.shuffle(); // Shuffle the artworks
-
-      // Limit the number of trending items to 10
-      _trendingItems = filteredArtworks.take(10).toList();
-      print('Trending items count: ${_trendingItems.length}');
     });
-  }
-
-  void _onArtworkTap(Map<String, String> artwork) {
-    final artName = artwork['Title'] ?? 'Unknown';
-    final artistName = artwork['Artist'] ?? 'Unknown';
-    final description = artwork['Description'] ?? 'No description available'; // Extract description
-    final imagePath = artwork['FileLocation'] ?? '';
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ViewPage(
-          artName: artName,
-          artistName: artistName,
-          description: description,
-          imagePath: imagePath,
-        ),
-      ),
-    );
   }
 
   void _onCategoryButtonPressed(String category) {
     setState(() {
-      _selectedCategory = category; // Update the selected category
-      print('Selected Category: $_selectedCategory'); // Debug print
-      _updateSearchResults(); // Refresh the artworks based on the selected category
+      _selectedCategory = category;
+      _updateFilteredItems();
+    });
+  }
+
+  void _clearCategory() {
+    setState(() {
+      _selectedCategory = 'Trending';
+      _updateFilteredItems();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final Category category = Category(); // Create an instance of Category
     final List<String> allCategories = category.getCategoryPairs().expand((pair) => pair).toList();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -99,12 +150,12 @@ class _SearchPageState extends State<SearchPage> {
             child: TextField(
               onChanged: (value) {
                 setState(() {
-                  _searchQuery = value; // Update search query
-                  _updateSearchResults(); // Update search results
+                  _searchQuery = value;
+                  _updateFilteredItems();
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search by artwork name',
+                hintText: 'Search',
                 hintStyle: const TextStyle(color: Color.fromARGB(160, 51, 51, 51)),
                 prefixIcon: const Icon(Icons.search, color: Color(0xFF333333)),
                 filled: true,
@@ -118,135 +169,154 @@ class _SearchPageState extends State<SearchPage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'Categories',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF333333),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(), // Disable scrolling for this GridView
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Set to 2 columns
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 3, // Adjust aspect ratio to fit 2 columns
-              ),
-              itemCount: allCategories.length,
-              itemBuilder: (context, index) {
-                final categoryName = allCategories[index];
-
-                return ElevatedButton(
-                  onPressed: () {
-                    print('Button pressed: $categoryName'); // Debug print
-                    _onCategoryButtonPressed(categoryName);
-                  },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Category',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF333333),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _clearCategory,
                   style: ElevatedButton.styleFrom(
-                    fixedSize: const Size(100, 40), // Adjust size to make buttons more visible
-                    backgroundColor: const Color(0xFF333333), // Button color
+                    backgroundColor: const Color(0xFF333333),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: Text(
-                    categoryName,
+                    'Clear Category',
                     style: GoogleFonts.poppins(
-                      fontSize: 16, // Increase font size
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFFEDEDED),
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              _selectedCategory ?? 'Trending',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF333333),
-              ),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: allCategories.length,
+            itemBuilder: (context, index) {
+              final cat = allCategories[index];
+              return ElevatedButton(
+                onPressed: () => _onCategoryButtonPressed(cat),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _selectedCategory == cat ? Colors.blue : const Color(0xFF333333),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  cat,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFEDEDED),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _selectedCategory,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF333333),
             ),
           ),
-          SizedBox(
-            height: 300, // Adjust height as needed
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _trendingItems.map((item) {
-                  final artName = item['Title'] ?? 'Unknown';
-                  final artistName = item['Artist'] ?? 'Unknown';
-                  final imagePath = item['FileLocation'] ?? '';
-
-                  return GestureDetector(
-                    onTap: () => _onArtworkTap(item),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: SizedBox(
-                        width: 150, // Adjust width as needed
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start, // Align to the left
-                          children: [
-                            Container(
-                              width: 150, // Match container width to the overall width
-                              height: 150, // Adjust height as needed
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF333333), // Background color for the box
-                                borderRadius: BorderRadius.circular(8), // Rounded corners
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  imagePath,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Center(
-                                      child: Icon(
-                                        Icons.error,
-                                        color: Colors.red,
-                                        size: 60,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              artName, // Display the art name
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF333333),
-                              ),
-                              textAlign: TextAlign.left, // Align text to the left
-                            ),
-                            Text(
-                              artistName, // Display the artist name
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal,
-                                color: const Color(0xFF333333),
-                              ),
-                              textAlign: TextAlign.left, // Align text to the left
-                            ),
-                          ],
-                        ),
+          const SizedBox(height: 10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: filteredItems.length,
+            itemBuilder: (context, index) {
+              final item = filteredItems[index];
+              final artName = item['Title'] ?? 'Unknown';
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViewPage(
+                        artName: artName,
+                        artistName: item['Artist'] ?? 'Unknown',
+                        description: item['Description'] ?? '',
+                        imagePath: item['FileLocation'] ?? '',
                       ),
                     ),
                   );
-                }).toList(),
-              ),
-            ),
+                },
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        item['FileLocation'] ?? 'assets/placeholder.png',
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: () => _toggleFavorite(item),
+                          child: AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              return Icon(
+                                _isFavorited[artName] == true
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: _isFavorited[artName] == true
+                                    ? Colors.red
+                                    : Colors.white,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        left: 10,
+                        child: Text(
+                          artName,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

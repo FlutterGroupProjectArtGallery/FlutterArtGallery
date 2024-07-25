@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'screens.dart'; // Ensure this file contains SearchPage, HomeBody, LikePage
 
 class MyHomePage extends StatefulWidget {
@@ -15,7 +14,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final PageController _pageController = PageController(initialPage: 1);
   
   final List<Widget> _screens = [
-    const SearchPage(), // Ensure this widget is correctly defined
+     SearchPage(), // Ensure this widget is correctly defined
     HomeBody(), // Ensure this widget is correctly defined
     const LikePage(), // Ensure this widget is correctly defined
   ];

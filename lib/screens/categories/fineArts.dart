@@ -10,7 +10,7 @@ class FineArtData {
 }
 
 class FineArtCategory {
-  static const List<FineArtData> artEntries = [
+  static const List<FineArtData> fineEntries = [
     FineArtData(
         "farts1",
         "Fine Arts",

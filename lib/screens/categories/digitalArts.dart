@@ -10,7 +10,7 @@ class DigitalArtData {
 }
 
 class DigitalArtCategory {
-  static const List<DigitalArtData> artEntries = [
+  static const List<DigitalArtData> digitalEntries = [
     DigitalArtData(
         "darts1",
         "Digital Arts",
