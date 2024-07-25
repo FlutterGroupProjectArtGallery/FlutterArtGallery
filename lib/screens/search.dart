@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'category.dart';
@@ -8,7 +10,7 @@ import 'view.dart';
 import 'package:art_gallery_application/data/data.dart'; // Make sure this import is correct
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  const SearchPage({super.key});
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -56,11 +58,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
       final likedItems = querySnapshot.docs.map((doc) => doc.data()['name'] as String).toList();
       setState(() {
-        _isFavorited.addAll(Map.fromIterable(
-          likedItems,
-          key: (item) => item,
-          value: (item) => true,
-        ));
+        _isFavorited.addAll({ for (var item in likedItems) item : true });
       });
     }
   }

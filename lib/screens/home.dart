@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'screens.dart'; // Ensure this file contains SearchPage, HomeBody, LikePage
@@ -14,8 +16,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final PageController _pageController = PageController(initialPage: 1);
   
   final List<Widget> _screens = [
-     SearchPage(), // Ensure this widget is correctly defined
-    HomeBody(), // Ensure this widget is correctly defined
+     const SearchPage(), // Ensure this widget is correctly defined
+    const HomeBody(), // Ensure this widget is correctly defined
     const LikePage(), // Ensure this widget is correctly defined
   ];
 

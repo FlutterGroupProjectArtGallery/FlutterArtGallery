@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -48,11 +50,7 @@ class _HomeBodyState extends State<HomeBody> with SingleTickerProviderStateMixin
 
       final likedItems = querySnapshot.docs.map((doc) => doc.data()['name'] as String).toList();
       setState(() {
-        _isFavorited.addAll(Map.fromIterable(
-          likedItems,
-          key: (item) => item,
-          value: (item) => true,
-        ));
+        _isFavorited.addAll({ for (var item in likedItems) item : true });
       });
     }
   }
