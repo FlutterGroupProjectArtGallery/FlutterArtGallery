@@ -32,7 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
       _user = FirebaseAuth.instance.currentUser;
 
       if (_user != null) {
-        // Fetch user data from Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
@@ -44,16 +43,12 @@ class _ProfilePageState extends State<ProfilePage> {
             _lastName = userDoc.get('lastName') ?? '';
             _firstNameController.text = _firstName;
             _lastNameController.text = _lastName;
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _isLoading = false;
           });
         }
       }
     } catch (e) {
       print('Error fetching user data: $e');
+    } finally {
       setState(() {
         _isLoading = false;
       });
@@ -63,7 +58,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Update Firestore with new details
         await FirebaseFirestore.instance.collection('users').doc(_user!.uid).update({
           'firstName': _firstNameController.text,
           'lastName': _lastNameController.text,
@@ -97,29 +91,31 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _handleSignOut() async {
-    try {
-      // Clear cached data
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('shuffled_artworks');
-      await prefs.remove('app_initialized');
+      try {
+        // Clear any local data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('shuffled_artworks');
+        await prefs.remove('app_initialized');
 
-      // Sign out the user
-      await FirebaseAuth.instance.signOut();
+        // Sign out
+        await FirebaseAuth.instance.signOut();
 
-      // Navigate to the login page and remove all previous routes
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/login',
-        (Route<dynamic> route) => false,
-      );
-    } catch (e) {
-      // Handle any errors that occur during sign-out
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error signing out: $e'),
-        backgroundColor: Colors.red,
-      ));
+        // Navigate to the login page
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+          (Route<dynamic> route) => false,
+        );
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error signing out: $e'),
+            backgroundColor: Colors.red,
+          ));
+        }
+      }
     }
-  }
+
 
   @override
   void dispose() {
