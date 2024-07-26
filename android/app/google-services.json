@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "444423871729",
+    "firebase_url": "https://pocketsights-4936d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pocketsights-4936d",
+    "storage_bucket": "pocketsights-4936d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444423871729:android:b3ab0d345183c87d419d50",
+        "android_client_info": {
+          "package_name": "com.pocketsights.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1LuqbOcfVMSb-u9-0JOfyTUl4ZKIC1jg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
